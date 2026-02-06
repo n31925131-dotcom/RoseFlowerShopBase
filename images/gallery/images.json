@@ -1,0 +1,27 @@
+{
+  "categories": [
+    {
+      "name": "Baptisms",
+      "images": []
+    },
+    {
+      "name": "Bouquets",
+      "images": [
+        "bouquet-placeholder-1.jpg",
+        "bouquet-placeholder-2.jpg",
+        "bouquet-placeholder-3.jpg"
+      ]
+    },
+    {
+      "name": "Events",
+      "images": []
+    },
+    {
+      "name": "Weddings",
+      "images": [
+        "gallery-placeholder.jpg",
+        "placeholder.jpg"
+      ]
+    }
+  ]
+}
