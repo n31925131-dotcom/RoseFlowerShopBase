@@ -2,7 +2,11 @@
   "categories": [
     {
       "name": "Baptisms",
-      "images": []
+      "images": [
+        "baptism-placeholder1",
+        "baptism-placeholder2",
+        "baptism-placeholder3"
+      ]
     },
     {
       "name": "Bouquets",
