@@ -19,7 +19,9 @@
     },
     {
       "name": "Events",
-      "images": []
+      "images": [
+        "event-1" 
+      ]
     },
     {
       "name": "Weddings",
