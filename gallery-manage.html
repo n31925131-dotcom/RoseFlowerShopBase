@@ -433,7 +433,12 @@
         // ========================================
         // INITIALIZE
         // ========================================
-        
+        window.addEventListener('DOMContentLoaded', function() {
+    renderImages();
+    if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+    }
+});
        
     </script>
 </body>
