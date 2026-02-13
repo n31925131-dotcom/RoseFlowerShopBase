@@ -333,57 +333,77 @@
         // IMAGE UPLOAD
         // ========================================
         
-        function handleFileUpload(event) {
-            const files = event.target.files;
-            if (files.length === 0) return;
-            
-            const category = document.getElementById('category-select').value;
-            const uploadText = document.getElementById('upload-text');
-            
-            uploadText.textContent = 'Ανέβασμα...';
-            
-            // Process each file
-            let processed = 0;
-            const allImages = getGalleryImages();
-            
-            Array.from(files).forEach((file, index) => {
-                const reader = new FileReader();
-                
-                reader.onload = function(e) {
-                    // Create new image object
-                    const newImage = {
-                        id: generateId(),
-                        created_date: new Date().toISOString(),
-                        updated_date: new Date().toISOString(),
-                        created_by: 'admin@example.com',
-                        category: category,
-                        image_url: e.target.result, // data URL
-                        order: allImages.filter(img => img.category === category).length + index
-                    };
-                    
-                    allImages.push(newImage);
-                    processed++;
-                    
-                    // When all files are processed
-                    if (processed === files.length) {
-                        setGalleryImages(allImages);
-                        renderImages();
-                        uploadText.textContent = 'Επιλογή Εικόνων';
-                        showToast(`${files.length} εικόνες ανέβηκαν επιτυχώς`, 'success');
-                        
-                        // Clear file input
-                        event.target.value = '';
-                    }
-                };
-                
-                reader.onerror = function() {
-                    showToast('Κάτι πήγε στραβά κατά την ανέβασμα', 'error');
-                    uploadText.textContent = 'Επιλογή Εικόνων';
-                };
-                
-                reader.readAsDataURL(file);
-            });
+      // ========================================
+// IMAGE UPLOAD TO SERVER
+// ========================================
+
+async function uploadFile(file, category) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const response = await fetch('upload.php', {
+        method: 'POST',
+        body: formData
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Upload failed');
+    }
+
+    return await response.json(); // returns { success: true, file_path: 'images/...' }
+}
+
+function handleFileUpload(event) {
+    const files = event.target.files;
+    if (files.length === 0) return;
+
+    const category = document.getElementById('category-select').value;
+    const uploadText = document.getElementById('upload-text');
+    const originalText = uploadText.textContent;
+
+    uploadText.textContent = 'Ανέβασμα...';
+    uploadText.disabled = true; // optional, but can add a disabled class
+
+    let uploadedCount = 0;
+    const allImages = getGalleryImages();
+
+    // Process files one by one
+    Array.from(files).forEach(async (file) => {
+        try {
+            const result = await uploadFile(file, category);
+            // Create new image object with the server path
+            const newImage = {
+                id: generateId(),
+                created_date: new Date().toISOString(),
+                updated_date: new Date().toISOString(),
+                created_by: 'admin@example.com',
+                category: category,
+                image_url: result.file_path,  // relative path, e.g., "images/img_123.jpg"
+                order: allImages.filter(img => img.category === category).length + uploadedCount
+            };
+            allImages.push(newImage);
+            uploadedCount++;
+
+            // Update after each file (or you can wait until all done)
+            setGalleryImages(allImages);
+            renderImages();
+
+            if (uploadedCount === files.length) {
+                uploadText.textContent = originalText;
+                uploadText.disabled = false;
+                showToast(`${files.length} εικόνες ανέβηκαν επιτυχώς`, 'success');
+                event.target.value = ''; // clear input
+            }
+        } catch (error) {
+            console.error(error);
+            showToast('Σφάλμα κατά το ανέβασμα: ' + error.message, 'error');
+            // Still try to continue with other files? You may decide to stop.
+            uploadText.textContent = originalText;
+            uploadText.disabled = false;
         }
+    });
+}
 
         // ========================================
         // DELETE IMAGE
